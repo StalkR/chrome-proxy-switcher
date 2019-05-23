@@ -3,6 +3,7 @@
 <head>
   <title>Proxy Switcher Settings</title>
   <link rel="stylesheet" href="options.css">
+  <script src="settings.js"></script>
   <script src="options.js"></script>
 </head>
 <body>
@@ -11,7 +12,7 @@
     <tr>
       <th>Mode</th>
       <th>Value</th>
-      <th>Delete</th>
+      <th></th>
     </tr>
   </thead>
   <tbody id="list">
@@ -33,27 +34,27 @@
     <tr id="last">
       <td>
         <select id="mode">
-          <option value="fixed_servers">Fixed server</option>
-          <option value="pac_script">PAC script</option>
+          <option value="fixed_servers" selected>Fixed server</option>
+          <option value="pac_script">PAC URL</option>
+          <option value="pac_script_data">PAC script</option>
         </select>
       </td>
-      <td>
-        <input id="value" type="text" size="40">
-      </td>
+      <td id="container"></td>
       <td>
         <input id="add" type="button" value="add">
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>
-<p>
-For a fixed server, use <i>scheme://host:port</i>.
-Schemes: http, https, quic, socks4 or socks5.
-Example: <i>http://localhost:8080</i>
+<p>For a fixed server or PAC URL, use <i>scheme://host:port</i>.
+<br>Schemes: http, https, quic, socks4 or socks5.
+<br>Example: <i>http://localhost:8080</i>
 </p>
 <p>
-For a PAC script, use <i>file://path</i>.
-Example: <i>file:///home/user/proxy.pac</i>
+PAC URL no longer supports
+<i>file://</i>
+(<a href="https://bugs.chromium.org/p/chromium/issues/detail?id=839566">#839566</a>),
+use PAC script instead and copy the contents.
 </p>
 </body>
 </html>

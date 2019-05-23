@@ -1,51 +1,37 @@
-document.addEventListener('DOMContentLoaded', init, false);
+document.addEventListener("DOMContentLoaded", init, false);
 
-function init() {
-  chrome.storage.local.get("selected", function(items) {
-    if (chrome.runtime.error) return;
-    var selected = {};
-    if (items.selected !== undefined) selected = items.selected;
-    chrome.storage.sync.get("settings", function(items) {
-      if (chrome.runtime.error) return;
-      var settings = [];
-      if (items.settings !== undefined) settings = items.settings;
-      tableFill(settings, selected);
-    });
-  });
-}
-
-// TODO: get chrome proxy settings for initial selected state
-
-function tableFill(settings, selected) {
-  var base = [
+async function init() {
+  let settings = [
     {mode: "direct"},
     {mode: "system"},
     {mode: "auto_detect"}
-  ];
-  var options = base.concat(settings);
-  for (var i = 0; i < options.length; i++) {
-    tableAdd(options[i], selected);
+  ].concat(await loadSettings());
+  let selected = await loadSelected();
+  for (let i = 0; i < settings.length; i++) {
+    tableAdd(i, settings[i], selected);
   }
 }
 
-function tableAdd(proxy, selected) {
-  var tbody = document.getElementById("list");
-  var tr = document.createElement("tr");
-  var td = document.createElement("td");
-  var input = document.createElement("input");
+function tableAdd(i, proxy, selected) {
+  let tbody = document.getElementById("list");
+  let tr = document.createElement("tr");
+  let td = document.createElement("td");
+  let input = document.createElement("input");
   input.type = "radio";
   input.name = "choice";  // same name so only one selected at a time
-  input.id = "proxy-" + Math.random().toString(36);  // for the label
-  if (proxy.mode == selected.mode && proxy.value == selected.value) {
+  input.id = "proxy-" + i;
+  if (selected
+      && proxy.mode == selected.mode
+      && proxy.value == selected.value) {
     input.checked = true;
   }
   input.onclick = function() {
     switchProxy(proxy);
     chrome.browserAction.setTitle({title: nameProxy(proxy)});
-    chrome.storage.local.set({"selected": proxy}, function() {});
+    saveSelected(proxy);
   };
   td.appendChild(input);
-  var label = document.createElement("label");
+  let label = document.createElement("label");
   label.htmlFor = input.id;
   label.innerText = nameProxy(proxy);
   td.appendChild(label);
@@ -65,14 +51,14 @@ function nameProxy(proxy) {
       return "Fixed: " + proxy.value;
     case "pac_script":
       return "PAC: " + proxy.value;
+    case "pac_script_data":
+      return "PAC: " + proxy.value;
   }
   return "n/a";
 }
 
 function switchProxy(proxy) {
-  var config = {
-    mode: proxy.mode,
-  }
+  let config = {mode: proxy.mode};
   switch (proxy.mode) {
     case "direct":
       break;
@@ -82,7 +68,7 @@ function switchProxy(proxy) {
       // downloads a PAC script at http://wpad/wpad.dat
       break;
     case "fixed_servers":
-      var a = document.createElement("a");
+      let a = document.createElement("a");
       a.href = proxy.value;
       config.rules = {
         singleProxy: {
@@ -94,10 +80,19 @@ function switchProxy(proxy) {
       break;
     case "pac_script":
       config.pacScript = {
-        "url": proxy.value,
+        url: proxy.value,
         mandatory: true  // do not fallback to direct if invalid PAC script
       };
       break;
+    case "pac_script_data":
+      config.mode = "pac_script";
+      config.pacScript = {
+        data: proxy.data,
+        mandatory: true  // do not fallback to direct if invalid PAC script
+      };
+      break;
+    default:
+      throw "unexpected mode: " + proxy.mode;
   }
   switch (proxy.mode) {
     case "direct":
