@@ -26,6 +26,11 @@ async function loadSettings() {
     let proxy = await syncGet("proxy-" + i);
     if (proxy !== undefined) settings.push(proxy);
   }
+  // Restore legacy settings from 1.0, if any.
+  if (settings.length == 0) {
+    let old = await syncGet("settings");
+    if (old !== undefined) settings = old;
+  }
   return settings;
 }
 
