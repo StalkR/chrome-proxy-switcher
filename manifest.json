@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Proxy Switcher",
-  "version": "1.2",
+  "version": "1.4",
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",

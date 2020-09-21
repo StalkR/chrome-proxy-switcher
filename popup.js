@@ -68,14 +68,8 @@ function switchProxy(proxy) {
       // downloads a PAC script at http://wpad/wpad.dat
       break;
     case "fixed_servers":
-      let a = document.createElement("a");
-      a.href = proxy.value;
       config.rules = {
-        singleProxy: {
-          scheme: a.protocol.slice(0, -1),
-          host: a.hostname,
-          port: parseInt(a.port)
-        }
+        singleProxy: parseURL(proxy.value)
       };
       break;
     case "pac_script":
@@ -104,4 +98,18 @@ function switchProxy(proxy) {
       chrome.browserAction.setIcon({path: "icon24.png"});
   }
   chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+}
+
+const urlRE = new RegExp("^(?<scheme>[^:]+?)://(?<host>.*?):(?<port>[0-9]+)$");
+
+function parseURL(url) {
+  let m = url.match(urlRE);
+  if (!m) {
+    return {}
+  }
+  return {
+    scheme: m.groups.scheme,
+    host: m.groups.host,
+    port: parseInt(m.groups.port)
+  }
 }
