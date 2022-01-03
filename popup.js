@@ -27,7 +27,7 @@ function tableAdd(i, proxy, selected) {
   }
   input.onclick = function() {
     switchProxy(proxy);
-    chrome.browserAction.setTitle({title: nameProxy(proxy)});
+    chrome.action.setTitle({title: nameProxy(proxy)});
     saveSelected(proxy);
   };
   td.appendChild(input);
@@ -92,10 +92,10 @@ function switchProxy(proxy) {
     case "direct":
     case "system":
     case "auto_detect":
-      chrome.browserAction.setIcon({path: "icon24-grey.png"});
+      chrome.action.setIcon({path: "icon24-grey.png"});
       break;
     default:
-      chrome.browserAction.setIcon({path: "icon24.png"});
+      chrome.action.setIcon({path: "icon24.png"});
   }
   chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
 }
